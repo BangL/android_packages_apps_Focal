@@ -543,8 +543,26 @@ public class CameraManager {
         return mOrientation;
     }
 
+    /**
+     * Sets the current orientation of the device
+     * @param orientation The orientation, in degrees
+     */
     public void setOrientation(int orientation) {
         mOrientation = orientation;
+
+        // Rotate the pictures accordingly (display is kept at 90 degrees)
+        Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+        Camera.getCameraInfo(mCurrentFacing, info);
+        orientation = (orientation + 45) / 90 * 90;
+        int rotation = 0;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            rotation = (info.orientation - orientation + 360) % 360;
+        } else {  // back-facing camera
+            rotation = (info.orientation + orientation) % 360;
+        }
+
+        setParameterAsync("rotation", Integer.toString(rotation));
     }
 
     public void restartPreviewIfNeeded() {
@@ -1022,8 +1040,12 @@ public class CameraManager {
                 Camera.Parameters params = mCamera.getParameters();
 
                 if (getResources().getBoolean(R.bool.config_qualcommZslCameraMode)) {
+                    if (getResources().getBoolean(R.bool.config_useSamsungZSL)) {
+                        mCamera.sendRawCommand(1508, 0, 0);
+                    }
                     params.set("camera-mode", 1);
                 }
+                mCamera.setDisplayOrientation(90);
 
                 mCamera.setParameters(params);
 
