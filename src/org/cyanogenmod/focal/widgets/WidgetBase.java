@@ -111,7 +111,7 @@ public abstract class WidgetBase {
             }
         }
 
-        mWidget.addView(v, 0);
+        mWidget.addView(v);
     }
 
     /**
@@ -298,7 +298,7 @@ public abstract class WidgetBase {
             // to dispatch click / long click event, we do it first
             boolean defaultResult;
             if (event.getActionMasked() == MotionEvent.ACTION_UP && mCancelOpenOnDown) {
-                toggleBackground(false);
+                toggleBackground(mIsOpen);
                 defaultResult = false;
                 return true;
             } else {
